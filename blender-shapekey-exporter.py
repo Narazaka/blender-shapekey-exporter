@@ -11,7 +11,7 @@ bl_info = {
     'category': 'Mesh',
     'location': 'View 3D > Tool Shelf(2.79) / Sidebar(2.80) > Shapekey Exporter',
     'description': 'Name based shapekey export and import tool',
-    "version" : (0, 1, 0),
+    "version" : (0, 2, 0),
     "blender" : (2, 80, 0),
     'tracker_url': 'https://github.com/Narazaka/blender-shapekey-exporter/issues',
 }
