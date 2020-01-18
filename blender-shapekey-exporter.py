@@ -11,7 +11,7 @@ bl_info = {
     'category': 'Mesh',
     'location': 'View 3D > Tool Shelf(2.79) / Sidebar(2.80) > Shapekey Exporter',
     'description': 'Name based shapekey export and import tool',
-    "version" : (0, 1, 0),
+    "version" : (0, 2, 0),
     "blender" : (2, 80, 0),
     'tracker_url': 'https://github.com/Narazaka/blender-shapekey-exporter/issues',
 }
@@ -59,7 +59,7 @@ class ShapekeyExporter_OT_Export(bpy.types.Operator, ExportHelper):
             key_blocks = obj.data.shape_keys.key_blocks
             data[object_name] = {
                 "base": base_key_block.name,
-                "diffs": {},
+                "diffs": [],
             }
             for key_block_name in key_blocks.keys():
                 key_block = key_blocks[key_block_name]
@@ -71,8 +71,11 @@ class ShapekeyExporter_OT_Export(bpy.types.Operator, ExportHelper):
                 diff_key_values = []
                 for i in range(len(key_values)):
                     diff_key_values.append((key_values[i] - base_key_values[i])[:])
-                data[object_name]["diffs"][key_block_name] = diff_key_values
-        
+                data[object_name]["diffs"].append({
+                    "name": key_block_name,
+                    "values": diff_key_values,
+                })
+
         with open(self.filepath, mode='w', encoding="utf8") as f:
             json.dump(data, f, sort_keys=True, indent=4, ensure_ascii=False)
 
@@ -111,14 +114,15 @@ class ShapekeyExporter_OT_Import(bpy.types.Operator, ImportHelper):
 
             key_blocks = obj.data.shape_keys.key_blocks
             # overwrite always (TODO: selectable)
-            for key_block_name in data[object_name]["diffs"].keys():
+            for key_block_data in data[object_name]["diffs"]:
+                key_block_name = key_block_data["name"]
                 key_block = key_blocks.get(key_block_name)
                 if not key_block:
                     obj.shape_key_add()
                     key_blocks[-1].name = key_block_name
                 if base_key_block == key_block: # base
                     continue
-                key_values = [mathutils.Vector(vec) for vec in data[object_name]["diffs"][key_block_name]]
+                key_values = [mathutils.Vector(vec) for vec in key_block_data["values"]]
                 if len(key_values) != len(base_key_values):
                     raise RuntimeError("mesh vertex count is different: " + key_block_name)
                 for i in range(len(key_values)):
