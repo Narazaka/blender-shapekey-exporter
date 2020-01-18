@@ -67,7 +67,7 @@ class ShapekeyExporter_OT_Export(bpy.types.Operator, ExportHelper):
                     continue
                 key_values = [item.co for item in key_block.data.values()]
                 if len(key_values) != len(base_key_values):
-                    raise "not same len: " + key_block_name
+                    raise RuntimeError("mesh vertex count is different: " + key_block_name)
                 diff_key_values = []
                 for i in range(len(key_values)):
                     diff_key_values.append((key_values[i] - base_key_values[i])[:])
@@ -120,7 +120,7 @@ class ShapekeyExporter_OT_Import(bpy.types.Operator, ImportHelper):
                     continue
                 key_values = [mathutils.Vector(vec) for vec in data[object_name]["diffs"][key_block_name]]
                 if len(key_values) != len(base_key_values):
-                    raise "not same len: " + key_block_name
+                    raise RuntimeError("mesh vertex count is different: " + key_block_name)
                 for i in range(len(key_values)):
                     key_blocks[key_block_name].data[i].co = key_values[i] + base_key_values[i]
 
